@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:slido/create_slido.dart';
+import 'package:slido/create/create_slido.dart';
 import 'package:slido/firebase_options.dart';
 // import 'package:slido/home_screen.dart';
 // import 'firebase_options.dart';
@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      // /*
       theme: FlexThemeData.light(
         colors: const FlexSchemeColor(
           primary: Color(0xff004881),
@@ -86,6 +87,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         swapLegacyOnMaterial3: true,
       ),
+      // */
+      // themeMode: ThemeMode.dark,
       home: const CreateSlido(),
       // home: Center(
       //   child: Text('1'),

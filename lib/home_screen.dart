@@ -22,9 +22,9 @@ class _HomeScreenState extends State<HomeScreen> {
           stream: FirebaseFirestore.instance
               .collection('user')
               .doc('first')
-              .snapshots(),
+              .snapshots(includeMetadataChanges: true),
           builder: (context, snapshot) {
-            print(snapshot.connectionState);
+            // print(snapshot.connectionState);
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text('Loading...');
             }
@@ -42,15 +42,15 @@ class _HomeScreenState extends State<HomeScreen> {
               // return const Text('Error');
             }
             var userDocument = snapshot.data;
-            print(userDocument);
-            print(userDocument!['no']);
+            // print(userDocument);
+            // print(userDocument!['no']);
             // return Text('hehe');
             if (userDocument!['no'] == '1') {
               return const Text('No data');
             } else if (userDocument['no'] == '2') {
               return const Text('Somethings there');
             }
-            return Text('Error');
+            return const Text('Error');
           },
         ),
       ),

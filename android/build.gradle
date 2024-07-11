@@ -8,10 +8,15 @@ allprojects {
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+    // project.evaluationDependsOn(":app")
 }
-subprojects {
-    project.evaluationDependsOn(":app")
-}
+// subprojects {
+// }
+// // Project-level build.gradle
+// dependencies {
+//     classpath 'com.google.gms:google-services:4.3.10' // Use the latest version
+// }
+
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
