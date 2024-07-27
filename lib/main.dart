@@ -2,8 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:slido/auth/auth.dart';
 import 'package:slido/create/create_slido.dart';
 import 'package:slido/firebase_options.dart';
+// import 'package:google_fonts/google_fonts.dart';
 // import 'package:slido/home_screen.dart';
 // import 'firebase_options.dart';
 
@@ -62,6 +64,16 @@ class MyApp extends StatelessWidget {
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
         useMaterial3: true,
         swapLegacyOnMaterial3: true,
+      ).copyWith(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue.withOpacity(0.18),
+            side: BorderSide(
+                style: BorderStyle.solid,
+                color: Colors.blue.withOpacity(0.5),
+                width: 2),
+          ),
+        ),
       ),
       darkTheme: FlexThemeData.dark(
         colors: const FlexSchemeColor(
@@ -86,10 +98,22 @@ class MyApp extends StatelessWidget {
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
         useMaterial3: true,
         swapLegacyOnMaterial3: true,
+        // textTheme: GoogleFonts.robotoTextTheme(),
+      ).copyWith(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue.withOpacity(0.18),
+            side: BorderSide(
+                style: BorderStyle.solid,
+                color: Colors.blue.withOpacity(0.5),
+                width: 2),
+          ),
+        ),
       ),
       // */
       // themeMode: ThemeMode.dark,
       home: const CreateSlido(),
+      // home: const Auth(),
       // home: Center(
       //   child: Text('1'),
       // ),

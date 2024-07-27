@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
               .doc('first')
               .snapshots(includeMetadataChanges: true),
           builder: (context, snapshot) {
-            // print(snapshot.connectionState);
+            print(snapshot.connectionState);
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text('Loading...');
             }

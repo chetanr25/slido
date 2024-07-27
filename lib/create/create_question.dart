@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // import 'package:uuid/uuid.dart';
 // @immutable
@@ -30,23 +31,20 @@ class _CreateQuestionState extends State<CreateQuestion> {
     super.dispose();
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  // }
+  String email = '';
+  SharedPreferences? prefs;
+  void sharedPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    email = prefs?.getString('email') ?? 'chetan250204@gmail.com';
+  }
 
   @override
   void initState() {
     super.initState();
-    // Future.delayed(Durations.extralong1, () {
-    // print(widget.fireData);
-    // });
+    sharedPrefs();
     if (widget.fireData != null) {
-      // print('hmhm');
       setState(() {
         question = widget.fireData!['question'];
-
         correct = widget.fireData!['correct'];
         question = widget.fireData!['question'];
         questionController.text = question;
@@ -108,16 +106,28 @@ class _CreateQuestionState extends State<CreateQuestion> {
         : widget.fireData!['id'];
     snack('Question saved', context: context, color: Colors.green);
 
-    FirebaseFirestore.instance.collection(code).doc(id.toString()).set(
-      {
-        // 'qno': (widget.fireData!.length + 1),
-        // 'timeStamp':
-        'id': id,
-        'question': question,
-        'options': options,
-        'correct': correct,
-      },
-    );
+    FirebaseFirestore.instance.collection('users').doc(email).update({
+      "noOfQuestions": FieldValue.increment(1),
+      "questions": FieldValue.arrayUnion([
+        {
+          'id': id,
+          'question': question,
+          'options': options,
+          'correct': correct,
+        }
+      ])
+    });
+
+    // .update(
+    //   {
+    //     // 'qno': (widget.fireData!.length + 1),
+    //     // 'timeStamp':
+    // 'id': id,
+    // 'question': question,
+    // 'options': options,
+    // 'correct': correct,
+    //   },
+    // );
     Navigator.pop(context);
   }
 

@@ -40,6 +40,12 @@ dependencies:
   cloud_firestore: ^5.0.2
   gap: ^3.0.1
   uuid: ^4.4.0
+  qr_flutter: ^4.1.0
+  shared_preferences: ^2.2.3
+  device_info_plus: ^10.1.0
+  google_sign_in: ^6.2.1
+  firebase_auth: ^5.1.2
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
