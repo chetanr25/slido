@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 // import 'package:gap/gap.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:slido/consts.dart';
 
 // ignore: must_be_immutable
-class CreateSlidoQr extends StatefulWidget {
-  CreateSlidoQr({super.key, this.textData = 'google.com'});
+class WaitingInteractiveMode extends StatefulWidget {
+  WaitingInteractiveMode({super.key, this.textData = 'google.com'});
   var textData;
 
   @override
-  State<CreateSlidoQr> createState() => _CreateSlidoQrState();
+  State<WaitingInteractiveMode> createState() => _WaitingInteractiveModeState();
 }
 
-class _CreateSlidoQrState extends State<CreateSlidoQr> {
+class _WaitingInteractiveModeState extends State<WaitingInteractiveMode> {
   String email = '';
 
   SharedPreferences? prefs;
@@ -31,10 +32,6 @@ class _CreateSlidoQrState extends State<CreateSlidoQr> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Scan Qr to start interacting'),
-      // ),
-
       body: Container(
         alignment: Alignment.center,
         child: Card(
@@ -82,22 +79,12 @@ class _CreateSlidoQrState extends State<CreateSlidoQr> {
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(10.0)),
-                  // margin: EdgeInsets.all(10),
-                  // shadowColor: Colors.white,
-                  // elevation: 12,
                   child: Container(
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.65),
-                    // margin: const EdgeInsets.only(left: 30, right: 30),
-                    // padding: const EdgeInsets.only(left: 30, right: 30),
                     child: TextField(
                       controller: TextEditingController(text: widget.textData),
                       readOnly: true,
-                      // enabled: false,
-                      // style: const TextStyle(
-                      //   color: Colors.white,
-                      //   fontSize: 20,
-                      // ),
                     ),
                   ),
                 ),
@@ -108,45 +95,20 @@ class _CreateSlidoQrState extends State<CreateSlidoQr> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .primaryContainer
-                            .withOpacity(0.5),
-                        side: BorderSide(
-                            style: BorderStyle.solid,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.5),
-                            width: 2),
-                      ),
+                      style: buttonStyle(context),
                       onPressed: () {},
                       label: const Text('Copy link'),
                       icon: const Icon(Icons.link),
                     ),
                     const SizedBox(width: 10),
                     ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .primaryContainer
-                            .withOpacity(0.5),
-                        side: BorderSide(
-                            style: BorderStyle.solid,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.5),
-                            width: 2),
-                      ),
+                      style: buttonStyle(context),
                       onPressed: () {},
                       label: const Text('Share link'),
                       icon: const Icon(Icons.share),
                     ),
                   ],
                 ),
-                // const Gap(40),
               ],
             ),
           ),
