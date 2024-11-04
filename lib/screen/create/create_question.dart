@@ -2,18 +2,20 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:slido/Providers/firebase_provider.dart';
+import 'package:slido/Providers/shared_preferences_provider.dart';
 import 'package:slido/util/snack_bar.dart';
 
-class CreateQuestion extends StatefulWidget {
+class CreateQuestion extends ConsumerStatefulWidget {
   const CreateQuestion({super.key, this.fireData});
   final Map<String, dynamic>? fireData;
 
   @override
-  State<CreateQuestion> createState() => _CreateQuestionState();
+  ConsumerState<CreateQuestion> createState() => _CreateQuestionState();
 }
 
-class _CreateQuestionState extends State<CreateQuestion> {
+class _CreateQuestionState extends ConsumerState<CreateQuestion> {
   final ScrollController _scrollController = ScrollController();
   final List<FocusNode> _focusNodes = [];
   final TextEditingController questionController = TextEditingController();
@@ -21,21 +23,28 @@ class _CreateQuestionState extends State<CreateQuestion> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _focusNodes.forEach((node) => node.dispose());
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
     super.dispose();
   }
 
-  String email = '';
-  SharedPreferences? prefs;
-  void sharedPrefs() async {
-    prefs = await SharedPreferences.getInstance();
-    email = prefs?.getString('email') ?? 'chetan250204@gmail.com';
-  }
+  String? email;
+  List<dynamic> options = ['', ''];
+  bool isChanged = false;
+  String question = '';
+  int correct = 0;
+  // SharedPreferences? prefs;
+  // void sharedPrefs() async {
+  //   prefs = await SharedPreferences.getInstance();
+  //   email = prefs?.getString('email') ?? 'chetan250204@gmail.com';
+  // }
 
   @override
   void initState() {
     super.initState();
-    sharedPrefs();
+    // sharedPrefs();
+    // If the question is already present (edit)
     if (widget.fireData != null) {
       setState(() {
         question = widget.fireData!['question'];
@@ -56,18 +65,13 @@ class _CreateQuestionState extends State<CreateQuestion> {
     });
   }
 
-  List<dynamic> options = ['', ''];
-  bool isChanged = false;
-  String question = '';
-  int correct = 0;
-
   void saveToFirebase() {
     final id = widget.fireData == null
         ? Random().nextInt(1000000)
         : widget.fireData!['id'];
     snack('Question saved', context: context, color: Colors.green);
 
-    FirebaseFirestore.instance.collection('users').doc(email).update({
+    ref.read(firebaseUsersProvider).update({
       "noOfQuestions": FieldValue.increment(1),
       "questions": FieldValue.arrayUnion([
         {
@@ -121,6 +125,7 @@ class _CreateQuestionState extends State<CreateQuestion> {
 
   @override
   Widget build(BuildContext context) {
+    email = ref.read(emailProvider);
     return Scaffold(
       appBar: AppBar(
           title: const Text('Create quiz question'),
@@ -236,9 +241,7 @@ class _CreateQuestionState extends State<CreateQuestion> {
                   prefixIcon: const Icon(
                     Icons.question_mark_sharp,
                   ), // Adds an icon inside the TextField
-                  suffixIcon: const Icon(
-                      Icons.edit), // Adds an icon at the end of the TextField
-                  // You can customize further with properties like hintText, filled, fillColor, etc.
+                  suffixIcon: const Icon(Icons.edit),
                 ),
               ),
               const SizedBox(height: 10),

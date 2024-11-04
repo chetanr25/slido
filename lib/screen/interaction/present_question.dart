@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:slido/widgets/present_question/present_question_widget.dart';
 
 class PresentQuestionInteractiveMode extends StatefulWidget {
   const PresentQuestionInteractiveMode(
@@ -91,56 +92,9 @@ class _PresentQuestionInteractiveModeState
                     ),
                   ),
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ListTile(
-                  leading: Text(
-                    '${widget.currentQuestion + 1}.',
-                    style: const TextStyle(fontSize: 28),
-                  ),
-                  title: Text(
-                    widget.question['question'],
-                    style: const TextStyle(fontSize: 34),
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: widget.question['options'].length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          width: 2,
-                        ),
-                      ),
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withOpacity(0.5),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top: 10, bottom: 10, left: 20, right: 2),
-                        child: ListTile(
-                          leading: Text(
-                            '${String.fromCharCode(65 + index)}.',
-                            style: const TextStyle(fontSize: 26),
-                          ),
-                          title: Text(
-                            widget.question['options'][index],
-                            style: const TextStyle(fontSize: 26),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                PresentQuestionWidget(
+                    question: widget.question,
+                    currentQuestion: widget.currentQuestion)
               ],
             ),
           ),

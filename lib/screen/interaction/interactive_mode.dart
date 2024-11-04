@@ -1,12 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:slido/Providers/firebase_provider.dart';
 import 'package:slido/Providers/shared_preferences_provider.dart';
 import 'package:slido/consts.dart';
+import 'package:slido/screen/interaction/reveal_answer_mode.dart';
 import 'package:slido/screen/interaction/waiting.dart';
 import 'package:slido/screen/interaction/present_question.dart';
 import 'package:slido/screen/interaction/show_selections.dart';
@@ -39,6 +42,7 @@ class _InteractiveModeState extends ConsumerState<InteractiveMode> {
       Random random = Random();
       int randomNumber = random.nextInt(9999);
       randomNumberString = randomNumber.toString().padLeft(5, '0');
+      ref.watch(codeNotifierProvider.notifier).setCode(randomNumberString);
       // setState(() {
       //   code = randomNumberString;
       // });
@@ -46,8 +50,7 @@ class _InteractiveModeState extends ConsumerState<InteractiveMode> {
       await fire.set({
         email!: randomNumberString,
       });
-      var fireDataForActivating =
-          await FirebaseFirestore.instance.collection('users').doc(email).get();
+      var fireDataForActivating = await ref.read(firebaseUsersProvider).get();
       noOfQuestions = fireDataForActivating.data()!['noOfQuestions'];
 
       if (!fireDataForActivating.data()!.containsKey('active')) {
@@ -76,13 +79,12 @@ class _InteractiveModeState extends ConsumerState<InteractiveMode> {
         });
       }
     } else {
-      // setState(() {
       code = dataFromFire.data()![email];
-      // });
-      var fireMain =
-          await FirebaseFirestore.instance.collection('main').doc(code).get();
+
+      final firebaseInteracionRef =
+          FirebaseFirestore.instance.collection('main').doc(code);
+      var fireMain = await firebaseInteracionRef.get();
       var data = fireMain.data()!;
-      // print(data);
       currentQuestion = data['currentQuestion'];
       mode = data['mode'];
       modeIndex = modes.indexOf(mode);
@@ -93,6 +95,7 @@ class _InteractiveModeState extends ConsumerState<InteractiveMode> {
     setState(() {
       isWaiting = false;
     });
+
     ref.read(codeNotifierProvider.notifier).setCode(code!);
   }
 
@@ -112,172 +115,164 @@ class _InteractiveModeState extends ConsumerState<InteractiveMode> {
     email = ref.read(emailProvider);
     code = ref.read(codeProvider);
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Interactive Mode'),
-        ),
-        bottomNavigationBar: BottomAppBar(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.stop),
-                onPressed: () {
-                  Navigator.pop(context);
-                  Future.delayed(const Duration(seconds: 2), () {
-                    FirebaseFirestore.instance
-                        .collection('main')
-                        .doc(code)
-                        .delete();
-                    FirebaseFirestore.instance
-                        .collection('main')
-                        .doc('active')
-                        .set({
-                      email!: FieldValue.delete(),
-                    });
+      appBar: AppBar(
+        title: const Text('Interactive Mode'),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.stop),
+              onPressed: () {
+                Navigator.pop(context);
+                Future.delayed(const Duration(seconds: 2), () {
+                  ref.read(firebaseInteractionProvider).delete();
+
+                  FirebaseFirestore.instance
+                      .collection('main')
+                      .doc('active')
+                      .set({
+                    email!: FieldValue.delete(),
                   });
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.all(0),
-                child: ElevatedButton.icon(
-                  iconAlignment: IconAlignment.start,
-                  onPressed: mode != 'waiting'
-                      ? () {
-                          modeIndex--;
-                          if (modeIndex < 0) {
-                            modeIndex = modes.length - 1;
-                          }
-                          setState(() {
-                            mode = modes[modeIndex];
-                          });
-                          FirebaseFirestore.instance
-                              .collection('main')
-                              .doc(code)
-                              .update({'mode': mode});
+                });
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(0),
+              child: ElevatedButton.icon(
+                iconAlignment: IconAlignment.start,
+                onPressed: mode != 'waiting'
+                    ? () {
+                        modeIndex--;
+                        if (modeIndex < 0) {
+                          modeIndex = modes.length - 1;
                         }
-                      : null,
-                  style: buttonStyle(context),
-                  label: const Text(
-                    '',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  icon: const Icon(
-                    Icons.arrow_left_outlined,
-                    size: 35,
-                  ),
+                        setState(() {
+                          mode = modes[modeIndex];
+                        });
+                        ref
+                            .read(firebaseInteractionProvider)
+                            .update({'mode': mode});
+                      }
+                    : null,
+                style: buttonStyle(context),
+                label: const Text(
+                  '',
+                  style: TextStyle(fontSize: 16),
+                ),
+                icon: const Icon(
+                  Icons.arrow_left_outlined,
+                  size: 35,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(0),
-                child: ElevatedButton.icon(
-                  iconAlignment: IconAlignment.end,
-                  onPressed: () {
-                    if (mode == 'waiting') {
-                      mode = 'question';
-                      FirebaseFirestore.instance
-                          .collection('main')
-                          .doc(code)
-                          .update({'mode': mode});
-                      return;
-                    }
-                    modeIndex++;
-                    if (modeIndex >= modes.length) {
-                      modeIndex = 0;
-                    }
-                    // setState(() {
-                    mode = modes[modeIndex];
-                    // });
-                    FirebaseFirestore.instance
-                        .collection('main')
-                        .doc(code)
+            ),
+            Padding(
+              padding: const EdgeInsets.all(0),
+              child: ElevatedButton.icon(
+                iconAlignment: IconAlignment.end,
+                onPressed: () {
+                  if (mode == 'waiting') {
+                    mode = 'question';
+                    ref
+                        .read(firebaseInteractionProvider)
                         .update({'mode': mode});
-                  },
-                  style: buttonStyle(context),
-                  label: const Text(
-                    '',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  icon: const Icon(
-                    Icons.arrow_right_alt,
-                    size: 35,
-                  ),
+
+                    return;
+                  }
+                  modeIndex++;
+                  if (modeIndex >= modes.length) {
+                    modeIndex = 0;
+                  }
+                  // setState(() {
+                  mode = modes[modeIndex];
+                  // });
+                  ref.read(firebaseInteractionProvider).update({'mode': mode});
+                },
+                style: buttonStyle(context),
+                label: const Text(
+                  '',
+                  style: TextStyle(fontSize: 16),
+                ),
+                icon: const Icon(
+                  Icons.arrow_right_alt,
+                  size: 35,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        body: !isWaiting
-            ? StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('main')
-                    .doc(code)
-                    .snapshots(),
-                builder: (context, AsyncSnapshot snapshot) {
-                  if (snapshot.hasError) {
-                    return const Center(
-                      child: Text('Error'),
-                    );
-                  }
-                  if (!snapshot.hasData) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  var currentQuestion = snapshot.data.data()['currentQuestion'];
-                  if (snapshot.data.data()['mode'] == 'waiting') {
-                    return WaitingInteractiveMode(textData: code);
-                  }
-                  if (snapshot.data.data()['mode'] == 'question') {
-                    Future.delayed(Durations.short1, () {
-                      // setState(() {
-                      currentQuestion = snapshot.data.data()['currentQuestion'];
-                      // });
-                    });
-                    return PresentQuestionInteractiveMode(
-                      question: snapshot.data.data()['questions']
-                          [currentQuestion],
-                      currentQuestion: currentQuestion,
-                      snapshot: snapshot.data.reference,
-                    );
-                    return Center(
-                      child: Text(snapshot.data.data()['questions']
-                              [snapshot.data.data()['currentQuestion']]
-                          ['question']),
-                    );
-                  }
-
-                  if (snapshot.data.data()['mode'] == 'selections') {
-                    return ShowSelections(
-                      question: snapshot.data.data()['questions']
-                          [currentQuestion],
-                      currentQuestion: currentQuestion,
-                    );
-                  }
-                  if (snapshot.data.data()['mode'] == 'answer') {
-                    return const Center(
-                      child: Text('Answer'),
-                    );
-                  }
-
-                  if (snapshot.data.data()!.containsKey('currentQuestion')) {
-                    return Center(
-                      child: Text(snapshot.data.data()['questions']
-                              [snapshot.data.data()['currentQuestion']]
-                          ['question']),
-                    );
-                  }
-                  return ListView(
-                    children: snapshot.data!.docs.map((document) {
-                      return ListTile(
-                        title: Text(document['question']),
-                        subtitle: Text(document['answer']),
-                      );
-                    }).toList(),
+      ),
+      body: !isWaiting
+          ? StreamBuilder(
+              stream: ref.watch(firebaseInteractionProvider).snapshots(),
+              builder: (context, AsyncSnapshot snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('Error'),
                   );
-                },
-              )
-            : const Center(
-                child: CircularProgressIndicator(),
-              ));
+                }
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                print(snapshot.data);
+                var currentQuestion = snapshot.data.data()['currentQuestion'];
+                if (snapshot.data.data()['mode'] == 'waiting') {
+                  return WaitingInteractiveMode(textData: code);
+                }
+                if (snapshot.data.data()['mode'] == 'question') {
+                  Future.delayed(Durations.short1, () {
+                    // setState(() {
+                    currentQuestion = snapshot.data.data()['currentQuestion'];
+                    // });
+                  });
+                  return PresentQuestionInteractiveMode(
+                    question: snapshot.data.data()['questions']
+                        [currentQuestion],
+                    currentQuestion: currentQuestion,
+                    snapshot: snapshot.data.reference,
+                  );
+                }
+
+                if (snapshot.data.data()['mode'] == 'selections') {
+                  return ShowSelections(
+                    question: snapshot.data.data()['questions']
+                        [currentQuestion],
+                    currentQuestion: currentQuestion,
+                  );
+                }
+                if (snapshot.data.data()['mode'] == 'answer') {
+                  print(snapshot.data.data()['questions'][currentQuestion]
+                      ['correct']);
+                  return RevealAnswerMode(
+                    question: snapshot.data.data()['questions']
+                        [currentQuestion],
+                    correctAnswer: snapshot.data.data()['questions']
+                        [currentQuestion]['correct'],
+                  );
+                }
+
+                if (snapshot.data.data()!.containsKey('currentQuestion')) {
+                  return Center(
+                    child: Text(snapshot.data.data()['questions']
+                        [snapshot.data.data()['currentQuestion']]['question']),
+                  );
+                }
+                return ListView(
+                  children: snapshot.data!.docs.map((document) {
+                    return ListTile(
+                      title: Text(document['question']),
+                      subtitle: Text(document['answer']),
+                    );
+                  }).toList(),
+                );
+              },
+            )
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
+    );
   }
 }
