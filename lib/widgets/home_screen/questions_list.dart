@@ -1,24 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:slido/Providers/firebase_provider.dart';
 import 'package:slido/Providers/shared_preferences_provider.dart';
 import 'package:slido/screen/create/create_question.dart';
-
-// class QuestionsList extends StatefulWidget {
-//   const QuestionsList({super.key, required this.email});
-//   final String email;
-//   @override
-//   State<QuestionsList> createState() => _QuestionsListState();
-// }
 
 class QuestionsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final email = ref.watch(emailProvider)!;
+    final email = ref.read(emailProvider)!;
 
     return StreamBuilder(
-      stream:
-          FirebaseFirestore.instance.collection('users').doc(email).snapshots(),
+      stream: ref.read(firebaseUsersProvider).snapshots(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Text('Loading...');
@@ -89,8 +82,7 @@ class QuestionsList extends ConsumerWidget {
                       trailing: IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
-                            deleteConfirmation(
-                                questions, index, context, email);
+                            deleteConfirmation(questions, index, context, ref);
                           }),
                     ),
                   ));
@@ -102,7 +94,7 @@ class QuestionsList extends ConsumerWidget {
   }
 }
 
-void deleteConfirmation(questions, index, context, email) {
+void deleteConfirmation(questions, index, context, ref) {
   showDialog(
     context: context,
     builder: (context) {
@@ -126,7 +118,7 @@ void deleteConfirmation(questions, index, context, email) {
             ),
             onPressed: () {
               Navigator.pop(context);
-              FirebaseFirestore.instance.collection('users').doc(email).update({
+              ref.read(firebaseUsersProvider).update({
                 'noOfQuestions': FieldValue.increment(-1),
                 'questions': FieldValue.arrayRemove([
                   {
