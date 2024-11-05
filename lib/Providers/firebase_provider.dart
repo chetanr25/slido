@@ -5,11 +5,10 @@ import 'package:slido/Providers/shared_preferences_provider.dart';
 final firebaseProvider = Provider((ref) => FirebaseFirestore.instance);
 
 final firebaseInteractionProvider = Provider((ref) {
-  final code = ref.watch(emailProvider);
-  print('ref.read(codeProvider) ${code} ${ref.watch(codeProvider)}');
+  // print(ref.read(codeProvider.notifier).state);
   return FirebaseFirestore.instance
       .collection('main')
-      .doc(ref.read(codeProvider));
+      .doc(ref.read(codeProvider.notifier).state);
 });
 
 final firebaseUsersProvider = Provider((ref) {
