@@ -72,6 +72,20 @@ final lightTheme = FlexThemeData.light(
   ),
 );
 
+final warningButtonStyle = ButtonStyle(
+  side: MaterialStateProperty.all(
+    const BorderSide(color: Colors.white, width: 1),
+  ),
+  backgroundColor: MaterialStateProperty.all(Colors.red),
+);
+RoundedRectangleBorder cardStyle(BuildContext context) =>
+    RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(15),
+      side: BorderSide(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        width: 2,
+      ),
+    );
 ButtonStyle buttonStyle(BuildContext context) => ElevatedButton.styleFrom(
       backgroundColor:
           Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),

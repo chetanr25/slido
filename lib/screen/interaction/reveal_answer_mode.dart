@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
+import 'package:slido/Providers/firebase_provider.dart';
+import 'package:slido/consts.dart';
 
 // class RevealAnswerMode extends StatefulWidget {
 //   const RevealAnswerMode({super.key});
@@ -9,11 +12,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RevealAnswerMode extends ConsumerWidget {
   const RevealAnswerMode(
-      {super.key, required this.question, required this.correctAnswer});
+      {super.key,
+      required this.question,
+      required this.correctAnswer,
+      required this.response});
+  final response;
   final int correctAnswer;
   final question;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // final firebaseResponse = ref.read(firebaseInteractionProvider).get();
+    // print(firebaseResponse['response']);
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -40,13 +49,7 @@ class RevealAnswerMode extends ConsumerWidget {
               itemCount: question['options'].length,
               itemBuilder: (context, index) {
                 return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      width: 2,
-                    ),
-                  ),
+                  shape: cardStyle(context),
                   color: index != correctAnswer
                       ? Theme.of(context)
                           .colorScheme
@@ -69,6 +72,42 @@ class RevealAnswerMode extends ConsumerWidget {
                   ),
                 );
               },
+            ),
+            const Gap(30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    'Correct: ${response['correctNo']}',
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    'Wrong: ${response['wrongNo']}',
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                ),
+                // Card(
+                //   child: Text(response['wrongNo'].toString()),
+                // )
+              ],
+            ),
+            const Gap(20),
+            Text(
+              'Correct Answer: ${question['options'][correctAnswer]}',
+              style: const TextStyle(fontSize: 24),
             ),
           ],
         ),
